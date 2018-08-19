@@ -475,9 +475,7 @@ data.frame(logistic_9$coefficients)
 a <- vif(logistic_10)
 a[a>2]
 
-
 # Removing day_of_weekfri
-
 
 logistic_11 <- glm(formula = response ~ jobretired + jobstudent + 
                      contactcellular + monthaug + monthjun + 
