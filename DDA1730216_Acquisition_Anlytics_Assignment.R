@@ -41,7 +41,7 @@ bank_data <- unique(bank_data)
 # Creating Unique Prospect ID for the remaning data
 
 bank_data$prospectId <- seq.int(nrow(bank_data))
-
+View(bank_data)
 #-------------------------------------------------------
 # Section 1: Business Understanding: Prospect Profiling
 #-------------------------------------------------------
@@ -77,6 +77,7 @@ bank_data$binning.age <- as.factor(cut(bank_data$age, breaks = c(16, 20, 30, 40,
 # Change the response value to numbers i.e"yes-no" to "1-0"
 bank_data$response <- ifelse(bank_data$response == "yes", 1, 0)
 
+
 # Check the numeric value of response rate in each bucket
 agg_age <- merge(aggregate(response ~ binning.age, bank_data, mean),aggregate(response~binning.age, bank_data, sum),by = "binning.age") 
 
@@ -103,6 +104,9 @@ ggplot(agg_age, aes(age, prospects_responded,label = response_rate)) +
 
 # View(Bank_data_age20)
 # summary(Bank_data_age20)
+
+# Observations:
+# Age groups 30-40 and 
 
 ## Also removeing age bin which is not required anymore.
 bank_data$binning.age <- NULL
@@ -171,7 +175,6 @@ plot_response(bank_data$contact,"Contact_mode")
 plot_response(bank_data$month,"Contact_month")
 
 # 1.2.3: "day_of_week" variable
-
 plot_response(bank_data$day_of_week,"day_of_week")
 
 # 1.2.4: "duration" variable: No Analysis done as it will not be used in the model. 
@@ -271,10 +274,10 @@ summary(bank_data$nr.employed)
 ###-----------------------------------------------------###
 
 ## Expectations:
-# Model without duration variable.
+# Model without duration variable. 
 
 
-bank_data$duration <- NULL
+# bank_data$duration <- NULL
 
 
 
@@ -289,6 +292,7 @@ library(dummies)
 
 # Creating dummy variables
 # Converting target variable to integer so that dummy variables are not created automatically.
+View(bank_data)
 
 bank_data$response <- as.integer(bank_data$response)
 summary(bank_data$response)
@@ -311,9 +315,11 @@ test <- bank_data[!split_indices, ]
 library(MASS)
 library(car)
 
+## Removing duration & prospectId from modelling as required.
+## Also removing ProspectId from the model through it appears as significant if you include in the model as it does not make sense to include the Unique ID variable.
 
 
-logistic_1 <- glm(response ~ . - duration , family = "binomial", data = train)
+logistic_1 <- glm(response ~ . - duration - prospectId, family = "binomial", data = train)
 
 summary(logistic_1)
 
@@ -604,9 +610,9 @@ logistic_final <- logistic_15
 ## Model Evaluation and Optimal Cutoff points
 ## Predicting probabilities of responding for the test data
 
-test$pred_prob <- predict(logistic_final, newdata = test[, -60], type = "response")
+test$pred_prob <- predict(logistic_final, newdata = test, type = "response")
 
-predictions_logit <- predict(logistic_final, newdata = test[, -60], type = "response")
+predictions_logit <- predict(logistic_final, newdata = test, type = "response")
 
 # Setting initial probability to 0.5 and check confusion matrix
 
@@ -687,7 +693,7 @@ for(i in 1:100)
 # plotting cutoffs chart for Sensitivity, Specificity & Accuracy 
 
 plot(s, OUT[,1],xlab="Cutoff",ylab="Value",cex.lab=1.5,cex.axis=1.5,ylim=c(0,1),type="l",lwd=2,axes=FALSE,col=2)
-axis(1,seq(0,1,length=5),seq(0,1,length=5),cex.lab=1.5)
+axis(1,seq(0,1,length=11),seq(0,1,length=11),cex.lab=1.5)
 axis(2,seq(0,1,length=5),seq(0,1,length=5),cex.lab=1.5)
 lines(s,OUT[,2],col="darkgreen",lwd=2)
 lines(s,OUT[,3],col=4,lwd=2)
@@ -718,9 +724,9 @@ cm_values
 ## Create a data frame with the variables prospect ID, actual response, predicted response, predicted probability of response, duration of call in seconds, and cost of call
 ## While creating the data frame, calculate the cost of call for each prospect in a new column
 
-## Creating Prospect Id on the test data frame as it will be the dataset used for further analysis (not creating on training set)
 
-test$prospectId <- seq.int(nrow(test))
+# test$prospectId <- seq.int(nrow(test)) already created in the bank_data
+
 test$pred_response <- predicted_response
 
 ## Creating a new data frame with required columns
