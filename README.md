@@ -1,6 +1,7 @@
 # AssignmentsNG
 
-This repository contains some of the individual assignments of my data science course in IIITB.
+This repository contains some of the individual assignments of my data science course in IIITB. 
+Not posted the code or work from group case studies here as it is a collective work of the team. 
 
 There are reasonable amount of comments in the source code to understand the flow and decisions made.
 
